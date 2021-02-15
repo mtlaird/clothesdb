@@ -44,8 +44,13 @@ def add_item_tag_link(conn, item_id, tag_id):
     insert_link_sql = "insert into items_tags (item_id, tag_id) values (?, ?)"
     c = conn.cursor()
     c.execute(insert_link_sql, (item_id, tag_id))
-    row_id = c.execute("select last_insert_rowid()").fetchone()[0]
-    conn.commit()
+    try:
+        row_id = c.execute("select last_insert_rowid()").fetchone()[0]
+        conn.commit()
+    except sqlite3.IntegrityError:
+        # Failed unique constraint, attempt to add a link that already exists, so just ignore it
+        # We don't use the row_id, so we can just drop it on the floor
+        row_id = None
     c.close()
     return row_id
 
@@ -159,7 +164,9 @@ def count_tags_by_item(conn, item_id):
 def get_item_summaries(conn, item_id_list):
     summaries = []
     for item_id in item_id_list:
-        summaries.append(get_summary_for_item(conn, item_id))
+        summary = get_summary_for_item(conn, item_id)
+        if summary:
+            summaries.append(summary)
     return summaries
 
 
