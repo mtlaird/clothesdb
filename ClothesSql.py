@@ -50,10 +50,17 @@ def add_item_tag_link(conn, item_id, tag_id):
     return row_id
 
 
+def add_taglist_to_item(conn, item_id, tag_list):
+    for tag_type, value in tag_list:
+        tag_id = get_tag_id(conn, tag_type, value)
+        add_item_tag_link(conn, item_id, tag_id)
+    return item_id
+
+
 def create_new_item_with_tags(conn, tag_list):
     item_id = add_new_item(conn)
     for tag_type, value in tag_list:
-        tag_id = add_new_tag(conn, tag_type, value)
+        tag_id = get_tag_id(conn, tag_type, value)
         add_item_tag_link(conn, item_id, tag_id)
     return item_id
 
@@ -83,13 +90,14 @@ def get_items_by_tag_id(conn, tag_id):
 
 
 def get_tags_by_item_id(conn, item_id):
-    select_tags_sql = "select tag_id from items_tags where item_id = ?"
+    select_tags_sql = "select t.type, t.value from items_tags it " \
+                      "inner join tags t on it.tag_id = t.tag_id where item_id = ?"
     c = conn.cursor()
     c.execute(select_tags_sql, (item_id,))
     res = c.fetchall()
     tag_ids = []
     for row in res:
-        tag_ids.append(row[0])
+        tag_ids.append(row)
     c.close()
     return tag_ids
 

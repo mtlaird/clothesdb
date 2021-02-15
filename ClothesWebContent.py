@@ -7,9 +7,26 @@ def add_item_form():
     return form_html
 
 
+def add_tags_form():
+    form_html = "<form method=post>\n"\
+                "<p>Add new tags:</p>\n"\
+                "<div id=tagFieldsContainer></div>\n"\
+                "<input type=submit></form>"
+
+    return form_html
+
+
+def tag_list_table(taglist):
+    html = "Tags for item:<br><table border=0>"
+    for tag in taglist:
+        html += "<tr><td>{}</td><td>{}</td></tr>".format(tag[0], tag[1])
+    html += "</table>"
+    return html
+
+
 def include_javascript_header():
     header = "<header>\n"\
-             "<script src=webapp.js></script>\n"\
+             "<script src=/webapp.js></script>\n"\
              "</header>\n"
 
     return header
