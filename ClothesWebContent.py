@@ -16,10 +16,18 @@ def add_tags_form():
     return form_html
 
 
-def tag_list_table(taglist):
+def item_tag_list_table(taglist):
     html = "Tags for item:<br>\n<table border=0>"
     for tag in taglist:
         html += "<tr><td>{}</td><td>{}</td></tr>".format(tag[0], tag[1])
+    html += "</table>"
+    return html
+
+
+def full_tag_list_table(taglist):
+    html = "Tags:<br>\n<table border=0>"
+    for tag in taglist:
+        html += "<tr><td>{}</td><td>{}</td><td>{}</td></tr>".format(tag[0], tag[1], tag[2])
     html += "</table>"
     return html
 

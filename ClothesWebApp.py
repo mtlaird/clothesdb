@@ -19,6 +19,7 @@ def extract_tags_from_request(r):
 @route('/')
 def index():
     html = "Welcome!<br>" \
+           "<a href='/tags'>View all tags</a>.<br>" \
            "<a href='/items'>View all items</a>.<br>" \
            "<a href='/add_item'>Add an item</a> to the database."
     return html
@@ -52,7 +53,7 @@ def get_item(item_id=None):
 
     taglist = get_tags_by_item_id(conn, int(item_id))
 
-    return include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + tag_list_table(taglist) + \
+    return include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + item_tag_list_table(taglist) + \
         add_tags_form() + "</body>"
 
 
@@ -64,6 +65,15 @@ def get_all_items():
     item_summaries = get_item_summaries(conn, item_ids)
 
     return item_summary_table(item_summaries) + "<br><a href='/add_item'>Add an item</a> to the database."
+
+
+@get('/tags')
+def get_all_tags():
+    conn = initialize_db()
+
+    taglist = get_all_tags_with_item_count(conn)
+
+    return full_tag_list_table(taglist)
 
 
 @get('/webapp.js')
