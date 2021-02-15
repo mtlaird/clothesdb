@@ -89,6 +89,28 @@ def get_items_by_tag_id(conn, tag_id):
     return item_ids
 
 
+def get_summary_for_item(conn, item_id):
+    summary = [item_id]
+    select_tag_value_sql = "select t.value from items_tags it inner join tags t on it.tag_id = t.tag_id " \
+                           "where t.type = ? and item_id = ? limit 1"
+    c = conn.cursor()
+    c.execute(select_tag_value_sql, ("Type", item_id))
+    res = c.fetchall()
+    if len(res) != 1:
+        return None
+    summary.append(res[0][0])
+    c.close()
+    c = conn.cursor()
+    c.execute(select_tag_value_sql, ("Color", item_id))
+    res = c.fetchall()
+    if len(res) != 1:
+        return None
+    summary.append(res[0][0])
+    c.close()
+    summary.append(count_tags_by_item(conn, item_id))
+    return summary
+
+
 def get_tags_by_item_id(conn, item_id):
     select_tags_sql = "select t.type, t.value from items_tags it " \
                       "inner join tags t on it.tag_id = t.tag_id where item_id = ?"
@@ -109,3 +131,34 @@ def count_tags_by_type(conn, tag_type):
     res = c.fetchone()
     c.close()
     return res[0]
+
+
+def count_tags_by_item(conn, item_id):
+    count_tags_sql = "select count(*) from items_tags where item_id = ?"
+    c = conn.cursor()
+    c.execute(count_tags_sql, (item_id,))
+    res = c.fetchone()
+    c.close()
+    return res[0]
+
+
+def get_item_summaries(conn, item_id_list):
+    summaries = []
+    for item_id in item_id_list:
+        summaries.append(get_summary_for_item(conn, item_id))
+    return summaries
+
+
+def get_all_item_ids(conn, limit=None, offset=None):
+    get_ids_sql = "select item_id from items "
+    if offset:
+        get_ids_sql += "where item_id > {} ".format(offset)
+    if limit:
+        get_ids_sql += "limit {}".format(limit)
+    c = conn.cursor()
+    c.execute(get_ids_sql)
+    res = c.fetchall()
+    item_ids = []
+    for row in res:
+        item_ids.append(row[0])
+    return item_ids

@@ -18,7 +18,10 @@ def extract_tags_from_request(r):
 
 @route('/')
 def index():
-    return "Welcome!"
+    html = "Welcome!<br>" \
+           "<a href='/items'>View all items</a>.<br>" \
+           "<a href='/add_item'>Add an item</a> to the database."
+    return html
 
 
 @get('/add_item')
@@ -33,13 +36,13 @@ def add_item_post():
     conn = initialize_db()
     new_row_id = create_new_item_with_tags(conn, tags)
 
-    html = "<p>New item created with id {} and {} tags.</p>".format(new_row_id, len(tags))
+    html = "<p><a href='/items/{}'>New item created</a> with {} tags.</p>".format(new_row_id, len(tags))
     html += "<p><a href='/add_item'>Add another item.</a></p>"
 
     return html
 
 
-@route('/item/<item_id>', method=['GET', 'POST'])
+@route('/items/<item_id>', method=['GET', 'POST'])
 def get_item(item_id=None):
     conn = initialize_db()
 
@@ -51,6 +54,16 @@ def get_item(item_id=None):
 
     return include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + tag_list_table(taglist) + \
         add_tags_form() + "</body>"
+
+
+@get('/items')
+def get_all_items():
+    conn = initialize_db()
+
+    item_ids = get_all_item_ids(conn)
+    item_summaries = get_item_summaries(conn, item_ids)
+
+    return item_summary_table(item_summaries) + "<br><a href='/add_item'>Add an item</a> to the database."
 
 
 @get('/webapp.js')
