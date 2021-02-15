@@ -19,7 +19,7 @@ def add_tags_form():
 def item_tag_list_table(taglist):
     html = "Tags for item:<br>\n<table border=0>"
     for tag in taglist:
-        html += "<tr><td>{}</td><td>{}</td></tr>".format(tag[0], tag[1])
+        html += "<tr><td><a href='/tags/types/{}'>{}</a></td><td>{}</td></tr>".format(tag[0], tag[0], tag[1])
     html += "</table>"
     return html
 
@@ -27,16 +27,18 @@ def item_tag_list_table(taglist):
 def full_tag_list_table(taglist):
     html = "Tags:<br>\n<table border=0>"
     for tag in taglist:
-        html += "<tr><td>{}</td><td>{}</td><td>{}</td></tr>".format(tag[0], tag[1], tag[2])
+        html += "<tr><td><a href='/tags/types/{}'>{}</a></td>" \
+                "<td>{}</td><td><a href='/tags/{}/items'>{}</a></td></tr>".format(tag[0], tag[0], tag[1], tag[2],
+                                                                                  tag[3])
     html += "</table>"
     return html
 
 
 def item_summary_table(item_summaries):
-    html = "Item summaries:<br>\n<table border=0>" \
-           "<tr><th>Type</th><th>Color</th><th>Tags</th></tr>"
+    html = "<table border=0>\n" \
+           "<tr><th>Type</th><th>Color</th><th>Tags</th></tr>\n"
     for i in item_summaries:
-        html += "<tr><td>{}</td><td>{}</td><td><a href='/items/{}'>{}</a></td></tr>".format(i[1], i[2], i[0], i[3])
+        html += "<tr><td>{}</td><td>{}</td><td><a href='/items/{}'>{}</a></td></tr>\n".format(i[1], i[2], i[0], i[3])
     html += "</table>"
     return html
 

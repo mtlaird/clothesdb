@@ -125,7 +125,7 @@ def get_tags_by_item_id(conn, item_id):
 
 
 def get_all_tags_with_item_count(conn):
-    select_tags_sql = "select type, value, count(it.item_id) from tags t " \
+    select_tags_sql = "select type, value, t.tag_id, count(it.item_id) from tags t " \
                       "inner join items_tags it on t.tag_id = it.tag_id " \
                       "group by it.tag_id order by type, value"
     c = conn.cursor()
@@ -172,7 +172,19 @@ def get_all_item_ids(conn, limit=None, offset=None):
     c = conn.cursor()
     c.execute(get_ids_sql)
     res = c.fetchall()
+    c.close()
     item_ids = []
     for row in res:
         item_ids.append(row[0])
     return item_ids
+
+
+def get_tags_by_type_with_count(conn, tag_type):
+    get_tags_sql = "select type, value, t.tag_id, count(it.item_id) from tags t " \
+                   "inner join items_tags it on t.tag_id = it.tag_id " \
+                   "where type = ? group by it.tag_id order by type, value"
+    c = conn.cursor()
+    c.execute(get_tags_sql, (tag_type,))
+    res = c.fetchall()
+    c.close()
+    return res
