@@ -16,6 +16,15 @@ def add_tags_form():
     return form_html
 
 
+def replace_tag_form():
+    form_html = "<form method=post>\n" \
+                "<p>Replace current tag with new tag:</p>\n" \
+                "<p>Type: <input type=text name='tag-type' size=10 autocomplete=off>\n" \
+                "Value: <input type=text name='tag-value' size=10 autocomplete=off></p>\n" \
+                "<input type=submit></form>"
+    return form_html
+
+
 def item_tag_list_table(taglist):
     html = "Tags for item:<br>\n<table border=0>"
     for tag in taglist:

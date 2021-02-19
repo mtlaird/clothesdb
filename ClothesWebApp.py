@@ -1,6 +1,6 @@
 from bottle import route, run, get, post, static_file, request
-from ClothesWebContent import *
-import ClothesSql as sql
+import ClothesWebContent as Web
+import ClothesSql as Sql
 
 
 def extract_tags_from_request(r):
@@ -27,15 +27,15 @@ def index():
 
 @get('/add_item')
 def add_item_get():
-    return include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + add_item_form() + "</body>"
+    return Web.include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + Web.add_item_form() + "</body>"
 
 
 @post('/add_item')
 def add_item_post():
     tags = extract_tags_from_request(request)
 
-    conn = sql.initialize_db()
-    new_row_id = sql.create_new_item_with_tags(conn, tags)
+    conn = Sql.initialize_db()
+    new_row_id = Sql.create_new_item_with_tags(conn, tags)
 
     html = "<p><a href='/items/{}'>New item created</a> with {} tags.</p>".format(new_row_id, len(tags))
     html += "<p><a href='/add_item'>Add another item.</a></p>"
@@ -45,54 +45,74 @@ def add_item_post():
 
 @route('/items/<item_id>', method=['GET', 'POST'])
 def get_item(item_id=None):
-    conn = sql.initialize_db()
+    conn = Sql.initialize_db()
 
     if request.method == "POST":
         add_tags = extract_tags_from_request(request)
-        sql.add_taglist_to_item(conn, int(item_id), add_tags)
+        Sql.add_taglist_to_item(conn, int(item_id), add_tags)
 
-    taglist = sql.get_tags_by_item_id(conn, int(item_id))
+    taglist = Sql.get_tags_by_item_id(conn, int(item_id))
 
-    return include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + item_tag_list_table(taglist) + \
-        add_tags_form() + "</body>"
+    return Web.include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + \
+        Web.item_tag_list_table(taglist) + Web.add_tags_form() + "</body>"
 
 
 @get('/items')
 def get_all_items():
-    conn = sql.initialize_db()
+    conn = Sql.initialize_db()
 
-    item_ids = sql.get_all_item_ids(conn)
-    item_summaries = sql.get_item_summaries(conn, item_ids)
+    item_ids = Sql.get_all_item_ids(conn)
+    item_summaries = Sql.get_item_summaries(conn, item_ids)
 
-    return item_summary_table(item_summaries) + "<br><a href='/add_item'>Add an item</a> to the database."
+    return Web.item_summary_table(item_summaries) + "<br><a href='/add_item'>Add an item</a> to the database."
 
 
 @get('/tags')
 def get_all_tags():
-    conn = sql.initialize_db()
+    conn = Sql.initialize_db()
 
-    taglist = sql.get_all_tags_with_item_count(conn)
+    taglist = Sql.get_all_tags_with_item_count(conn)
 
-    return full_tag_list_table(taglist)
+    return Web.full_tag_list_table(taglist)
 
 
 @get('/tags/<tag_id>/items')
 def get_items_by_tags(tag_id):
-    conn = sql.initialize_db()
+    conn = Sql.initialize_db()
 
-    item_ids = sql.get_items_by_tag_id(conn, int(tag_id))
-    item_summaries = sql.get_item_summaries(conn, item_ids)
+    item_ids = Sql.get_items_by_tag_id(conn, int(tag_id))
+    item_summaries = Sql.get_item_summaries(conn, item_ids)
 
-    return item_summary_table(item_summaries)
+    return Web.item_summary_table(item_summaries)
+
+
+@route('/tags/<tag_id>/manage', method=['GET', 'POST'])
+def manage_tag(tag_id):
+    conn = Sql.initialize_db()
+    html = ""
+    current_tag = Sql.get_tag_data(conn, tag_id)
+    if request.method == "GET":
+        html += "<p>Replace tag {} - {}:</p>".format(current_tag[0], current_tag[1])
+        html += Web.replace_tag_form()
+
+    if request.method == "POST":
+        new_tag = request.forms.get("tag-type"), request.forms.get("tag-value")
+        new_tag_id = Sql.add_new_tag(conn, new_tag[0], new_tag[1])
+        html += "<p>Replacing tag {} - {} with {} - {} ...</p>".format(current_tag[0], current_tag[1],
+                                                                   new_tag[0], new_tag[1])
+        tags_replaced = Sql.replace_tag(conn, new_tag_id, tag_id)
+        html += "<p>Replaced {} tags.</p>".format(tags_replaced)
+
+    return html
 
 
 @get('/tags/types/<tag_type>')
 def get_tags_by_type(tag_type):
-    conn = sql.initialize_db()
+    conn = Sql.initialize_db()
 
-    taglist = sql.get_tags_by_type_with_count(conn, tag_type)
+    taglist = Sql.get_tags_by_type_with_count(conn, tag_type)
 
-    return full_tag_list_table(taglist)
+    return Web.full_tag_list_table(taglist)
 
 
 @get('/webapp.js')

@@ -82,6 +82,18 @@ def get_tag_id(conn, tag_type, value):
     return add_new_tag(conn, tag_type, value)
 
 
+def get_tag_data(conn, tag_id):
+    select_tag_sql = "select type, value from tags tag_id = ?"
+    c = conn.cursor()
+    c.execute(select_tag_sql, (tag_id,))
+    res = c.fetchall()
+    if len(res) == 1:
+        c.close()
+        return res[0][0], res[0][1]
+    c.close()
+    return False
+
+
 def get_items_by_tag_id(conn, tag_id):
     select_items_sql = "select item_id from items_tags where tag_id = ?"
     c = conn.cursor()
@@ -161,6 +173,15 @@ def count_tags_by_item(conn, item_id):
     return res[0]
 
 
+def count_items_by_tag(conn, tag_id):
+    count_items_sql = "select count(*) from items_tags where tag_id = ?"
+    c = conn.cursor()
+    c.execute(count_items_sql, (tag_id,))
+    res = c.fetchone()
+    c.close()
+    return res[0]
+
+
 def get_item_summaries(conn, item_id_list):
     summaries = []
     for item_id in item_id_list:
@@ -186,6 +207,21 @@ def get_all_item_ids(conn, limit=None, offset=None):
     return item_ids
 
 
+def get_all_tag_types(conn, limit=None):
+    get_types_sql = "select DISTINCT(tag_type) from tags "
+    if limit:
+        get_types_sql += "limit {} ".format(limit)
+    get_types_sql += "order by tag_type"
+    c = conn.cursor()
+    c.execute(get_types_sql)
+    res = c.fetchall()
+    c.close()
+    types = []
+    for row in res:
+        types.append(row[0])
+    return types
+
+
 def get_tags_by_type_with_count(conn, tag_type):
     get_tags_sql = "select type, value, t.tag_id, count(it.item_id) from tags t " \
                    "inner join items_tags it on t.tag_id = it.tag_id " \
@@ -195,3 +231,24 @@ def get_tags_by_type_with_count(conn, tag_type):
     res = c.fetchall()
     c.close()
     return res
+
+
+def replace_tag(conn, new_tag_id, old_tag_id):
+    replace_tags_sql = "update items_tags set tag_id = ? where tag_id = ?"
+    c = conn.cursor()
+    c.execute(replace_tags_sql, (new_tag_id, old_tag_id))
+    c.execute("select changes()")
+    res = c.fetchone()
+    num_changes = res[0]
+    c.close()
+    return num_changes
+
+
+def delete_tag(conn, tag_id):
+    delete_tag_sql = "delete from tags where tag_id = ?"
+    if count_items_by_tag(conn, tag_id) > 0:
+        return False
+    c = conn.cursor()
+    c.execute(delete_tag_sql, (tag_id,))
+    c.close()
+    return True
