@@ -83,7 +83,7 @@ def get_tag_id(conn, tag_type, value):
 
 
 def get_tag_data(conn, tag_id):
-    select_tag_sql = "select type, value from tags tag_id = ?"
+    select_tag_sql = "select type, value from tags where tag_id = ?"
     c = conn.cursor()
     c.execute(select_tag_sql, (tag_id,))
     res = c.fetchall()

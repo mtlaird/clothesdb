@@ -21,7 +21,7 @@ def replace_tag_form():
                 "<p>Replace current tag with new tag:</p>\n" \
                 "<p>Type: <input type=text name='tag-type' size=10 autocomplete=off>\n" \
                 "Value: <input type=text name='tag-value' size=10 autocomplete=off></p>\n" \
-                "<input type=submit></form>"
+                "<input type=submit value=Replace></form>"
     return form_html
 
 

@@ -97,9 +97,9 @@ def manage_tag(tag_id):
 
     if request.method == "POST":
         new_tag = request.forms.get("tag-type"), request.forms.get("tag-value")
-        new_tag_id = Sql.add_new_tag(conn, new_tag[0], new_tag[1])
-        html += "<p>Replacing tag {} - {} with {} - {} ...</p>".format(current_tag[0], current_tag[1],
-                                                                   new_tag[0], new_tag[1])
+        new_tag_id = Sql.get_tag_id(conn, new_tag[0], new_tag[1])
+        html += "<p>Replacing tag <b>{} - {}</b> (ID {})<br>".format(current_tag[0], current_tag[1], int(tag_id))
+        html += "with <b>{} - {}</b> (ID {})...</p>".format(new_tag[0], new_tag[1], int(new_tag_id))
         tags_replaced = Sql.replace_tag(conn, new_tag_id, tag_id)
         html += "<p>Replaced {} tags.</p>".format(tags_replaced)
 
