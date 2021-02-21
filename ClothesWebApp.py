@@ -73,17 +73,21 @@ def get_all_tags():
 
     taglist = Sql.get_all_tags_with_item_count(conn)
 
-    return Web.full_tag_list_table(taglist)
+    return "<p>View any <a href='/tags/orphans'>orphaned tags</a>.</p>" + Web.full_tag_list_table(taglist)
 
 
 @get('/tags/<tag_id>/items')
-def get_items_by_tags(tag_id):
+def get_items_by_tag(tag_id):
     conn = Sql.initialize_db()
 
+    tag_data = Sql.get_tag_data(conn, tag_id)
     item_ids = Sql.get_items_by_tag_id(conn, int(tag_id))
     item_summaries = Sql.get_item_summaries(conn, item_ids)
 
-    return Web.item_summary_table(item_summaries)
+    html = "<p>Showing items with tag <b>{} - {}</b>.</p>".format(*tag_data)
+    html += "<p><a href='/tags/{}/manage'>Manage</a> this tag.</p>".format(tag_id)
+
+    return html + Web.item_summary_table(item_summaries) + "<p>Go back to the <a href='/tags'>list of tags</a>.</p>"
 
 
 @route('/tags/<tag_id>/manage', method=['GET', 'POST'])
@@ -102,6 +106,37 @@ def manage_tag(tag_id):
         html += "with <b>{} - {}</b> (ID {})...</p>".format(new_tag[0], new_tag[1], int(new_tag_id))
         tags_replaced = Sql.replace_tag(conn, new_tag_id, tag_id)
         html += "<p>Replaced {} tags.</p>".format(tags_replaced)
+
+    html += "<p>Go back to the <a href='/tags'>list of tags</a>.</p>"
+
+    return html
+
+
+@route('/tags/orphans', method=['GET', 'POST'])
+def get_orphan_tags():
+    conn = Sql.initialize_db()
+    html = ""
+
+    if request.method == "POST":
+        delete_tag_id = request.forms.get("tag-id")
+        delete_tag = Sql.get_tag_data(conn, int(delete_tag_id))
+        delete_result = Sql.delete_tag(conn, int(delete_tag_id))
+        if delete_result:
+            html += "<p>Deleted tag <b>{} - {}</b> (ID {}).</p>\n".format(delete_tag[0], delete_tag[1], delete_tag_id)
+
+    orphan_tags = Sql.get_orphan_tags(conn)
+    if len(orphan_tags) > 0:
+        html += "<p>Orphaned tags:</p>\n"
+        html += "<p><table border=0>\n"
+        for tag in orphan_tags:
+            html += "<tr><form method=post><td>{}</td><td>{}</td>" \
+                    "<td><input type=submit value=Delete></td>" \
+                    "<input type=hidden name=tag-id value='{}'></form></tr>".format(tag[0], tag[1], tag[2])
+        html += "</table></p>"
+    else:
+        html += "<p>There are no orphaned tags in the database.</p>"
+
+    html += "Go back to the <a href='/tags'>list of tags</a>."
 
     return html
 

@@ -155,6 +155,21 @@ def get_all_tags_with_item_count(conn):
     return tags
 
 
+def get_orphan_tags(conn):
+    select_tags_sql = "select type, value, tag_id from " \
+                      "(select type, value, t.tag_id, count(it.item_id) as count from tags t " \
+                      "left outer join items_tags it ON t.tag_id = it.tag_id " \
+                      "group by it.tag_id ) where count = 0"
+    c = conn.cursor()
+    c.execute(select_tags_sql)
+    res = c.fetchall()
+    tags = []
+    for row in res:
+        tags.append(row)
+    c.close()
+    return tags
+
+
 def count_tags_by_type(conn, tag_type):
     count_tags_sql = "select count(value) from tags where type = ?"
     c = conn.cursor()
