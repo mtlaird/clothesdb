@@ -25,22 +25,20 @@ def index():
     return html
 
 
-@get('/add_item')
-def add_item_get():
-    return Web.include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + Web.add_item_form() + "</body>"
+@route('/add_item', methods=['GET', 'POST'])
+def add_item():
+    if request.method == 'GET':
+        return Web.include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + Web.add_item_form() + "</body>"
+    if request.method == 'POST':
+        tags = extract_tags_from_request(request)
 
+        conn = Sql.initialize_db()
+        new_row_id = Sql.create_new_item_with_tags(conn, tags)
 
-@post('/add_item')
-def add_item_post():
-    tags = extract_tags_from_request(request)
+        html = "<p><a href='/items/{}'>New item created</a> with {} tags.</p>".format(new_row_id, len(tags))
+        html += "<p><a href='/add_item'>Add another item.</a></p>"
 
-    conn = Sql.initialize_db()
-    new_row_id = Sql.create_new_item_with_tags(conn, tags)
-
-    html = "<p><a href='/items/{}'>New item created</a> with {} tags.</p>".format(new_row_id, len(tags))
-    html += "<p><a href='/add_item'>Add another item.</a></p>"
-
-    return html
+        return html
 
 
 @route('/items/<item_id>', method=['GET', 'POST'])
