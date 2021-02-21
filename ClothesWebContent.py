@@ -1,3 +1,6 @@
+from html import escape
+
+
 def add_item_form():
     form_html = "<form method=post>\n"\
                 "<p>Create a new item of clothing with the following tags:</p>\n"\
@@ -52,9 +55,32 @@ def item_summary_table(item_summaries):
     return html
 
 
-def include_javascript_header():
+def create_tag_type_datalist(tag_type_list):
+    html = "<datalist id=tag-types-dl>\n"
+    for tt in tag_type_list:
+        html += "<option value='{}'>".format(tt)
+    html += "</datalist>\n"
+
+    return html
+
+
+def create_tag_values_datalist(tag_values_list, tag_type):
+    html = "<datalist id=tag-values-dl-{}>\n".format(tag_type.replace(" ", "_"))
+    for tv in tag_values_list:
+        html += "<option value='{}'>".format(escape(tv, True))  # True also escapes quotes
+    html += "</datalist>\n"
+
+    return html
+
+
+def include_javascript_header(tag_type_list=None, tag_value_list_dict=None):
     header = "<header>\n"\
-             "<script src=/webapp.js></script>\n"\
-             "</header>\n"
+             "<script src=/webapp.js></script>\n"
+    if tag_type_list:
+        header += create_tag_type_datalist(tag_type_list)
+        for tt in tag_type_list:
+            header += create_tag_values_datalist(tag_value_list_dict[tt], tt)
+
+    header += "</header>\n"
 
     return header

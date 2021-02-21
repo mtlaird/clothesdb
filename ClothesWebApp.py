@@ -16,6 +16,15 @@ def extract_tags_from_request(r):
     return tags
 
 
+def generate_header(conn):
+    tag_type_list = Sql.get_all_tag_types(conn)
+    tag_value_list_dict = {}
+    for tt in tag_type_list:
+        tag_value_list_dict[tt] = Sql.get_all_tag_values_by_type(conn, tt)
+
+    return Web.include_javascript_header(tag_type_list, tag_value_list_dict)
+
+
 @route('/')
 def index():
     html = "Welcome!<br>" \
@@ -25,14 +34,14 @@ def index():
     return html
 
 
-@route('/add_item', methods=['GET', 'POST'])
+@route('/add_item', method=['GET', 'POST'])
 def add_item():
+    conn = Sql.initialize_db()
     if request.method == 'GET':
-        return Web.include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + Web.add_item_form() + "</body>"
+        return generate_header(conn) + "<body onload='createNewTagFieldSet()'>" + Web.add_item_form() + "</body>"
     if request.method == 'POST':
         tags = extract_tags_from_request(request)
 
-        conn = Sql.initialize_db()
         new_row_id = Sql.create_new_item_with_tags(conn, tags)
 
         html = "<p><a href='/items/{}'>New item created</a> with {} tags.</p>".format(new_row_id, len(tags))
@@ -51,7 +60,7 @@ def get_item(item_id=None):
 
     taglist = Sql.get_tags_by_item_id(conn, int(item_id))
 
-    return Web.include_javascript_header() + "<body onload='createNewTagFieldSet()'>" + \
+    return generate_header(conn) + "<body onload='createNewTagFieldSet()'>" + \
         Web.item_tag_list_table(taglist) + Web.add_tags_form() + "</body>"
 
 

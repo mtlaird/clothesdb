@@ -223,10 +223,10 @@ def get_all_item_ids(conn, limit=None, offset=None):
 
 
 def get_all_tag_types(conn, limit=None):
-    get_types_sql = "select DISTINCT(tag_type) from tags "
+    get_types_sql = "select DISTINCT(type) from tags "
     if limit:
         get_types_sql += "limit {} ".format(limit)
-    get_types_sql += "order by tag_type"
+    get_types_sql += "order by type"
     c = conn.cursor()
     c.execute(get_types_sql)
     res = c.fetchall()
@@ -235,6 +235,18 @@ def get_all_tag_types(conn, limit=None):
     for row in res:
         types.append(row[0])
     return types
+
+
+def get_all_tag_values_by_type(conn, tag_type):
+    select_tag_values_sql = "select value from tags where type = ? order by value"
+    c = conn.cursor()
+    c.execute(select_tag_values_sql, (tag_type,))
+    res = c.fetchall()
+    tag_values = []
+    for row in res:
+        tag_values.append(row[0])
+    c.close()
+    return tag_values
 
 
 def get_tags_by_type_with_count(conn, tag_type):
