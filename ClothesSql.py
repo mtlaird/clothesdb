@@ -6,11 +6,13 @@ def create_schema(conn):
     create_tags_table_sql = "create table if not exists tags (tag_id integer primary key, type, value, " \
                             "unique(type, value))"
     create_item_tag_links_table_sql = "create table if not exists items_tags (item_id, tag_id, unique(item_id, tag_id))"
+    create_item_notes_sql = "create table if not exists items_notes (item_id, note_id integer primary key, note_text)"
 
     c = conn.cursor()
     c.execute(create_items_table_sql)
     c.execute(create_tags_table_sql)
     c.execute(create_item_tag_links_table_sql)
+    c.execute(create_item_notes_sql)
     c.close()
 
 
@@ -34,6 +36,16 @@ def add_new_tag(conn, tag_type, value):
     insert_tag_sql = "insert into tags (type, value) VALUES (?, ?)"
     c = conn.cursor()
     c.execute(insert_tag_sql, (tag_type, value))
+    row_id = c.execute("select last_insert_rowid()").fetchone()[0]
+    conn.commit()
+    c.close()
+    return row_id
+
+
+def add_note_to_item(conn, item_id, note_text):
+    insert_note_sql = "insert into items_notes (item_id, note_text) VALUES (?, ?)"
+    c = conn.cursor()
+    c.execute(insert_note_sql, (item_id, note_text))
     row_id = c.execute("select last_insert_rowid()").fetchone()[0]
     conn.commit()
     c.close()
@@ -139,6 +151,18 @@ def get_tags_by_item_id(conn, item_id):
         tags.append(row)
     c.close()
     return tags
+
+
+def get_notes_by_item_id(conn, item_id):
+    select_notes_sql = "select note_text from items_notes where item_id = ?"
+    c = conn.cursor()
+    c.execute(select_notes_sql, (item_id,))
+    res = c.fetchall()
+    notes = []
+    for row in res:
+        notes.append(row[0])
+    c.close()
+    return notes
 
 
 def get_all_tags_with_item_count(conn):

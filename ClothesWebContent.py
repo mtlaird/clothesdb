@@ -19,6 +19,14 @@ def add_tags_form():
     return form_html
 
 
+def add_note_form():
+    form_html = "<form method=post><input type=hidden name=add_note value=true>\n" \
+                "<p>Add a new note: </p>\n" \
+                "<textarea name=note_text></textarea><br><input type=submit></form>"
+
+    return form_html
+
+
 def replace_tag_form():
     form_html = "<form method=post>\n" \
                 "<p>Replace current tag with new tag:</p>\n" \
@@ -52,6 +60,17 @@ def item_summary_table(item_summaries):
     for i in item_summaries:
         html += "<tr><td>{}</td><td>{}</td><td><a href='/items/{}'>{}</a></td></tr>\n".format(i[1], i[2], i[0], i[3])
     html += "</table>"
+    return html
+
+
+def notes_display(notelist):
+    if len(notelist) == 0:
+        return ""
+
+    html = "<p>Notes:</p>\n"
+    for note in notelist:
+        html += "<p>{}</p>\n".format(note)
+
     return html
 
 

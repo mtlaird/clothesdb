@@ -1,4 +1,4 @@
-from bottle import route, run, get, post, static_file, request
+from bottle import route, run, get, static_file, request
 import ClothesWebContent as Web
 import ClothesSql as Sql
 
@@ -55,13 +55,18 @@ def get_item(item_id=None):
     conn = Sql.initialize_db()
 
     if request.method == "POST":
-        add_tags = extract_tags_from_request(request)
-        Sql.add_taglist_to_item(conn, int(item_id), add_tags)
+        if 'add_note' in request.forms:
+            note_text = request.forms.get('note_text')
+            Sql.add_note_to_item(conn, int(item_id), note_text)
+        else:
+            add_tags = extract_tags_from_request(request)
+            Sql.add_taglist_to_item(conn, int(item_id), add_tags)
 
     taglist = Sql.get_tags_by_item_id(conn, int(item_id))
+    notelist = Sql.get_notes_by_item_id(conn, int(item_id))
 
-    return generate_header(conn) + "<body onload='createNewTagFieldSet()'>" + \
-        Web.item_tag_list_table(taglist) + Web.add_tags_form() + "</body>"
+    return generate_header(conn) + "<body onload='createNewTagFieldSet()'>" + Web.notes_display(notelist) + \
+        Web.add_note_form() + Web.item_tag_list_table(taglist) + Web.add_tags_form() + "</body>"
 
 
 @get('/items')
