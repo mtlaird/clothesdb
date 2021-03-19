@@ -2,3 +2,4 @@ venv/*
 .idea/*
 clothes.db
 *.pyc
+config.json
