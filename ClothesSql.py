@@ -1,4 +1,7 @@
 import sqlite3
+from bottle import default_app
+
+app = default_app()
 
 
 def create_schema(conn):
@@ -17,7 +20,7 @@ def create_schema(conn):
 
 
 def initialize_db():
-    conn = sqlite3.connect("clothes.db")
+    conn = sqlite3.connect(app.config['db'])
     create_schema(conn)
     return conn
 

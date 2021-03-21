@@ -1,7 +1,8 @@
-from bottle import route, run, get, static_file, request, default_app
+from bottle import route, get, static_file, request, default_app
 import ClothesWebContent as Web
 import ClothesSql as Sql
-from ClothesWebConfig import AppConfig
+
+app = default_app()
 
 
 def extract_tags_from_request(r):
@@ -166,10 +167,3 @@ def get_tags_by_type(tag_type):
 @get('/webapp.js')
 def send_js():
     return static_file('webapp.js', 'static')
-
-
-if __name__ == '__main__':
-    appconfig = AppConfig()
-    run(host=appconfig.hostname, port=appconfig.port)
-
-app = default_app()
