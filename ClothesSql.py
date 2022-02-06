@@ -291,6 +291,7 @@ def replace_tag(conn, new_tag_id, old_tag_id):
     replace_tags_sql = "update items_tags set tag_id = ? where tag_id = ?"
     c = conn.cursor()
     c.execute(replace_tags_sql, (new_tag_id, old_tag_id))
+    conn.commit()
     c.execute("select changes()")
     res = c.fetchone()
     num_changes = res[0]

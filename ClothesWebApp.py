@@ -119,7 +119,7 @@ def manage_tag(tag_id):
         new_tag_id = Sql.get_tag_id(conn, new_tag[0], new_tag[1])
         html += "<p>Replacing tag <b>{} - {}</b> (ID {})<br>".format(current_tag[0], current_tag[1], int(tag_id))
         html += "with <b>{} - {}</b> (ID {})...</p>".format(new_tag[0], new_tag[1], int(new_tag_id))
-        tags_replaced = Sql.replace_tag(conn, new_tag_id, tag_id)
+        tags_replaced = Sql.replace_tag(conn, int(new_tag_id), int(tag_id))
         html += "<p>Replaced {} tags.</p>".format(tags_replaced)
 
     html += "<p>Go back to the <a href='/tags'>list of tags</a>.</p>"
