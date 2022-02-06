@@ -1,6 +1,7 @@
 from bottle import route, get, static_file, request, default_app
 import ClothesWebContent as Web
 import ClothesSql as Sql
+from sqlite3 import IntegrityError
 
 app = default_app()
 
@@ -138,8 +139,11 @@ def manage_tag(tag_id):
         new_tag_id = Sql.get_tag_id(conn, new_tag[0], new_tag[1])
         html += "<p>Replacing tag <b>{} - {}</b> (ID {})<br>".format(current_tag[0], current_tag[1], int(tag_id))
         html += "with <b>{} - {}</b> (ID {})...</p>".format(new_tag[0], new_tag[1], int(new_tag_id))
-        tags_replaced = Sql.replace_tag(conn, int(new_tag_id), int(tag_id))
-        html += "<p>Replaced {} tags.</p>".format(tags_replaced)
+        try:
+            tags_replaced = Sql.replace_tag(conn, int(new_tag_id), int(tag_id))
+            html += "<p>Replaced {} tags.</p>".format(tags_replaced)
+        except IntegrityError:
+            html += "<p><b>Could not replace all tags, replacement would create duplicate tag.</b></p>"
 
     html += "<p>Go back to the <a href='/tags'>list of tags</a>.</p>"
 
