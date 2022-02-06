@@ -186,7 +186,7 @@ def get_orphan_tags(conn):
     select_tags_sql = "select type, value, tag_id from " \
                       "(select type, value, t.tag_id, count(it.item_id) as count from tags t " \
                       "left outer join items_tags it ON t.tag_id = it.tag_id " \
-                      "group by it.tag_id ) where count = 0"
+                      "group by t.tag_id ) where count = 0"
     c = conn.cursor()
     c.execute(select_tags_sql)
     res = c.fetchall()
@@ -305,5 +305,6 @@ def delete_tag(conn, tag_id):
         return False
     c = conn.cursor()
     c.execute(delete_tag_sql, (tag_id,))
+    conn.commit()
     c.close()
     return True
