@@ -291,7 +291,10 @@ def get_tags_by_type_with_count(conn, tag_type):
 def replace_tag(conn, new_tag_id, old_tag_id):
     replace_tags_sql = "update items_tags set tag_id = ? where tag_id = ?"
     c = conn.cursor()
-    c.execute(replace_tags_sql, (new_tag_id, old_tag_id))
+    try:
+        c.execute(replace_tags_sql, (new_tag_id, old_tag_id))
+    except sqlite3.IntegrityError:
+        raise
     conn.commit()
     c.execute("select changes()")
     res = c.fetchone()
