@@ -32,8 +32,6 @@ def replace_tag_form():
                 "<p>Replace current tag with new tag:</p>\n" \
                 "<div id=singleTagContainer></div>\n" \
                 "<input type=submit value=Replace></form>"
-    # "<p>Type: <input type=text name='tag-type' size=10 autocomplete=off>\n" \
-    # "Value: <input type=text name='tag-value' size=10 autocomplete=off></p>\n" \
     return form_html
 
 
@@ -41,6 +39,18 @@ def item_tag_list_table(taglist):
     html = "Tags for item:<br>\n<table border=0>"
     for tag in taglist:
         html += "<tr><td><a href='/tags/types/{}'>{}</a></td><td>{}</td></tr>".format(tag[0], tag[0], tag[1])
+    html += "</table>"
+    return html
+
+
+def item_tag_list_for_delete_table(item_id, taglist):
+    html = "Item tags for deletion:<br>\n<table border=0>"
+    for tag in taglist:
+        html += "<tr><td><a href='/tags/types/{}'>{}</a></td><td>{}</td>".format(tag[0], tag[0], tag[1])
+        html += "<td><form method=post><input type=submit value=Delete>"
+        html += "<input type=hidden name=tag_type value={}>".format(tag[0])
+        html += "<input type=hidden name=tag_value value={}>".format(tag[1])
+        html += "</form></td></tr>"
     html += "</table>"
     return html
 

@@ -68,7 +68,26 @@ def get_item(item_id=None):
     notelist = Sql.get_notes_by_item_id(conn, int(item_id))
 
     return generate_header(conn) + "<body onload='createNewTagFieldSet()'>" + Web.notes_display(notelist) + \
-        Web.add_note_form() + Web.item_tag_list_table(taglist) + Web.add_tags_form() + "</body>"
+        Web.add_note_form() + Web.item_tag_list_table(taglist) + \
+        "<p><a href=/items/{}/delete_tags>Delete tags</a> from this item.</p>".format(item_id) \
+        + Web.add_tags_form() + "</body>"
+
+
+@route('/items/<item_id>/delete_tags', method=['GET', 'POST'])
+def delete_item_tags(item_id):
+    conn = Sql.initialize_db()
+
+    deletion_result = ""
+    if request.method == "POST":
+        tag_type = request.forms.get('tag_type')
+        tag_value = request.forms.get('tag_value')
+        tag_id = Sql.get_tag_id(conn, tag_type, tag_value)
+        Sql.delete_tag_from_item(conn, tag_id, int(item_id))
+        deletion_result = "<p>Deleted tag '{} - {}' from item.</p>".format(tag_type, tag_value)
+    taglist = Sql.get_tags_by_item_id(conn, int(item_id))
+
+    return deletion_result + Web.item_tag_list_for_delete_table(item_id, taglist) \
+        + "<p><a href=/items/{}>Back</a> to main item page.".format(item_id)
 
 
 @get('/items')

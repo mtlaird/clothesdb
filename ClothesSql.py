@@ -145,7 +145,8 @@ def get_summary_for_item(conn, item_id):
 
 def get_tags_by_item_id(conn, item_id):
     select_tags_sql = "select t.type, t.value from items_tags it " \
-                      "inner join tags t on it.tag_id = t.tag_id where item_id = ?"
+                      "inner join tags t on it.tag_id = t.tag_id where item_id = ? " \
+                      "order by t.type, t.value"
     c = conn.cursor()
     c.execute(select_tags_sql, (item_id,))
     res = c.fetchall()
@@ -305,6 +306,15 @@ def delete_tag(conn, tag_id):
         return False
     c = conn.cursor()
     c.execute(delete_tag_sql, (tag_id,))
+    conn.commit()
+    c.close()
+    return True
+
+
+def delete_tag_from_item(conn, tag_id, item_id):
+    delete_tag_sql = "delete from items_tags where tag_id = ? and item_id = ?"
+    c = conn.cursor()
+    c.execute(delete_tag_sql, (tag_id, item_id))
     conn.commit()
     c.close()
     return True
