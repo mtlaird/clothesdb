@@ -30,9 +30,10 @@ def add_note_form():
 def replace_tag_form():
     form_html = "<form method=post>\n" \
                 "<p>Replace current tag with new tag:</p>\n" \
-                "<p>Type: <input type=text name='tag-type' size=10 autocomplete=off>\n" \
-                "Value: <input type=text name='tag-value' size=10 autocomplete=off></p>\n" \
+                "<div id=singleTagContainer></div>\n" \
                 "<input type=submit value=Replace></form>"
+    # "<p>Type: <input type=text name='tag-type' size=10 autocomplete=off>\n" \
+    # "Value: <input type=text name='tag-value' size=10 autocomplete=off></p>\n" \
     return form_html
 
 

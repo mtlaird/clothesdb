@@ -110,11 +110,12 @@ def manage_tag(tag_id):
     html = ""
     current_tag = Sql.get_tag_data(conn, tag_id)
     if request.method == "GET":
+        html += generate_header(conn) + "<body onload='createSingleTagField()'>"
         html += "<p>Replace tag {} - {}:</p>".format(current_tag[0], current_tag[1])
         html += Web.replace_tag_form()
 
     if request.method == "POST":
-        new_tag = request.forms.get("tag-type"), request.forms.get("tag-value")
+        new_tag = request.forms.get("tag-type-0"), request.forms.get("tag-value-0")
         new_tag_id = Sql.get_tag_id(conn, new_tag[0], new_tag[1])
         html += "<p>Replacing tag <b>{} - {}</b> (ID {})<br>".format(current_tag[0], current_tag[1], int(tag_id))
         html += "with <b>{} - {}</b> (ID {})...</p>".format(new_tag[0], new_tag[1], int(new_tag_id))
